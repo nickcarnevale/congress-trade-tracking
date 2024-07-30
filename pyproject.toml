@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "senate-trade-tracking"
 version = "0.1.0"
-description = ""
+description = "A project to scrape stock transactions from Senator periodic filings"
 authors = ["Nicholas Carnevale <nickcarnevale2@gmail.com>"]
 readme = "README.md"
 
@@ -10,6 +10,7 @@ python = "^3.12"
 beautifulsoup4 = "^4.12.3"
 pandas = "^2.2.2"
 requests = "^2.32.3"
+lxml = "^5.2.2"
 
 
 [build-system]
