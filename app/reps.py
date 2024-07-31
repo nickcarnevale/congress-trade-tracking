@@ -62,18 +62,18 @@ def process_xml_file(file_path, existing_df):
     
     return existing_df
 
-# Initialize an empty DataFrame for collecting all PDFs
-full_df = pd.DataFrame()
+# Load the initial DataFrame from the CSV file
+df = pd.read_csv('data/pre-2024-rep-data.csv')
 
 # Iterate over all XML files in the data directory
-for filename in os.listdir('data/'):
+for filename in os.listdir('input/'):
     if filename.endswith('.xml'):
-        file_path = os.path.join('data/', filename)
+        file_path = os.path.join('input/', filename)
         print(f'Processing {file_path}...')
         
-        full_df = process_xml_file(file_path, full_df)
+        df = process_xml_file(file_path, df)
 
 # Save the sorted DataFrame to a CSV file
-full_df.to_csv('output/filtered_members.csv', index=False)
+df.to_csv('output/filtered_members.csv', index=False)
 
 print("Filtered members saved to 'output/filtered_members.csv'")
