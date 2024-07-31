@@ -1,6 +1,7 @@
 import xml.etree.ElementTree as ET
 import pandas as pd
 import requests
+import os
 
 ROOT = 'https://disclosures-clerk.house.gov/public_disc/ptr-pdfs'
 
@@ -11,51 +12,35 @@ ROOT = 'https://disclosures-clerk.house.gov/public_disc/ptr-pdfs'
 # 7 digit id
 # 8220177 doc id -> hand delivered - scanned pdf
 
-# Parse the XML file
-tree = ET.parse('data/2024FD.xml')  # Replace 'your_file.xml' with the actual filename
-root = tree.getroot()
+def process_xml_file(file_path, existing_df):
+    tree = ET.parse(file_path)
+    root = tree.getroot()
 
-pdfs = []
+    pdfs = []
 
-# Iterate over each member element in the XML
-for member in root.findall('Member'):
-    filing_type = member.find('FilingType').text
-    
-    if filing_type == 'P':
-        # Extract relevant data
-        prefix = member.find('Prefix').text or ''
-        last_name = member.find('Last').text or ''
-        first_name = member.find('First').text or ''
-        suffix = member.find('Suffix').text or ''
-        state_dst = member.find('StateDst').text or ''
-        year = member.find('Year').text or ''
-        filing_date = member.find('FilingDate').text or ''
-        doc_id = member.find('DocID').text or ''
-        
-        # Construct the URL for the document PDF
-        pdf_url = f'{ROOT}/{year}/{doc_id}.pdf'
-        # Check if the DocID is 8 digits (valid PDF) or 7 digits (scanned PDF)
-        if len(doc_id) == 8:
-            # Check if the PDF URL is valid
-            response = requests.head(pdf_url)
-            if response.status_code == 200:
-                print(f'[VALID] PDF found for {first_name} {last_name} at {pdf_url}')
-                pdfs.append({
-                    'Prefix': prefix,
-                    'LastName': last_name,
-                    'FirstName': first_name,
-                    'Suffix': suffix,
-                    'StateDst': state_dst,
-                    'Year': year,
-                    'FilingDate': filing_date,
-                    'DocID': doc_id,
-                    'PDF_URL': pdf_url,
-                    'PDF_Status': 'Valid'
-                })
+    for member in root.findall('Member'):
+        filing_type = member.find('FilingType').text
+
+        if filing_type == 'P':
+            prefix = member.find('Prefix').text or ''
+            last_name = member.find('Last').text or ''
+            first_name = member.find('First').text or ''
+            suffix = member.find('Suffix').text or ''
+            state_dst = member.find('StateDst').text or ''
+            year = member.find('Year').text or ''
+            filing_date = member.find('FilingDate').text or ''
+            doc_id = member.find('DocID').text or ''
+
+            pdf_url = f'{ROOT}/{year}/{doc_id}.pdf'
+
+            if len(doc_id) == 8:
+                response = requests.head(pdf_url)
+                pdf_status = 'Valid' if response.status_code == 200 else 'Invalid'
+            elif len(doc_id) == 7:
+                pdf_status = 'Scanned'
             else:
-                print(f'[INVALID] PDF not found for {first_name} {last_name} at {pdf_url}')
-        elif len(doc_id) == 7:
-            print(f'[SCANNED] Scanned PDF for {first_name} {last_name} at {pdf_url}')
+                continue
+
             pdfs.append({
                 'Prefix': prefix,
                 'LastName': last_name,
@@ -66,14 +51,29 @@ for member in root.findall('Member'):
                 'FilingDate': filing_date,
                 'DocID': doc_id,
                 'PDF_URL': pdf_url,
-                'PDF_Status': 'Scanned'
+                'PDF_Status': pdf_status
             })
-      
 
-# Convert the list to a DataFrame
-df = pd.DataFrame(pdfs)
+    if pdfs:
+        new_df = pd.DataFrame(pdfs)
+        new_df['FilingDate'] = pd.to_datetime(new_df['FilingDate'], format='%m/%d/%Y', errors='coerce')
+        existing_df = pd.concat([existing_df, new_df], ignore_index=True)
+        existing_df = existing_df.sort_values(by=['LastName', 'FilingDate'], ascending=[True, False])
+    
+    return existing_df
 
-# Save the DataFrame to a CSV file
-df.to_csv('output/filtered_members.csv', index=False)
+# Initialize an empty DataFrame for collecting all PDFs
+full_df = pd.DataFrame()
+
+# Iterate over all XML files in the data directory
+for filename in os.listdir('data/'):
+    if filename.endswith('.xml'):
+        file_path = os.path.join('data/', filename)
+        print(f'Processing {file_path}...')
+        
+        full_df = process_xml_file(file_path, full_df)
+
+# Save the sorted DataFrame to a CSV file
+full_df.to_csv('output/filtered_members.csv', index=False)
 
 print("Filtered members saved to 'output/filtered_members.csv'")
