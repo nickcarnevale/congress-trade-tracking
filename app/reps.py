@@ -40,6 +40,8 @@ for member in root.findall('Member'):
 # Convert the list to a DataFrame
 df = pd.DataFrame(filtered_members)
 
+print(filtered_members)
+
 # Save the DataFrame to a CSV file
 df.to_csv('filtered_members.csv', index=False)
 

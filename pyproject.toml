@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "senate-trade-tracking"
+name = "congress-trade-tracking"
 version = "0.1.0"
 description = "A project to scrape stock transactions from Senator periodic filings"
 authors = ["Nicholas Carnevale <nickcarnevale2@gmail.com>"]
