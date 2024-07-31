@@ -136,7 +136,7 @@ def txs_for_report(client: requests.Session, row: List[str]) -> pd.DataFrame:
 
     stocks = []
     for table_row in tbody.find_all('tr'):
-        cols = [c.get_text() for c in table_row.find_all('td')]
+        cols = [c.get_text().strip() for c in table_row.find_all('td')]
         tx_date, ticker, asset_name, asset_type, order_type, tx_amount =\
             cols[1], cols[3], cols[4], cols[5], cols[6], cols[7]
         if asset_type != 'Stock' and ticker.strip() in ('--', ''):
@@ -162,23 +162,24 @@ def main() -> pd.DataFrame:
     reports = senator_reports(client, limit=5)  # Limit to one senator
     all_txs_list = []  # Use a list to collect all DataFrames
     for i, row in enumerate(reports):
-        if i % 10 == 0:
-            LOGGER.info('Fetching report #{}'.format(i))
-            LOGGER.info('{} transactions total'.format(len(all_txs_list)))
+        LOGGER.info('Fetching report #{}'.format(i+1))
         txs = txs_for_report(client, row)
-        all_txs_list.append(txs)  # Append DataFrame to list
+        all_txs_list.append(txs) 
+        LOGGER.info('{} transactions total'.format(len(all_txs_list)))
 
     # Concatenate all DataFrames into a single DataFrame
     all_txs = pd.concat(all_txs_list, ignore_index=True)
     return all_txs
 
+
 if __name__ == '__main__':
     log_format = '[%(asctime)s %(levelname)s] %(message)s'
     logging.basicConfig(level=logging.INFO, format=log_format)
     senator_txs = main()
-    print(senator_txs.head())  # Print the first few rows of the DataFrame
     LOGGER.info('Dumping to .csv')
-    senator_txs.to_csv('senators_transactions.csv', index=False)  # Save to CSV file
+    with open('senators_transactions.csv', 'w', newline='') as f:
+        senator_txs.to_csv(f, index=False)
+
     # LOGGER.info('Dumping to .pickle')
     # with open('data/senators.pickle', 'wb') as f:
     #     pickle.dump(senator_txs, f)
