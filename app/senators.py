@@ -177,7 +177,7 @@ if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO, format=log_format)
     senator_txs = main()
     LOGGER.info('Dumping to .csv')
-    with open('senators_transactions.csv', 'w', newline='') as f:
+    with open('output/senators_transactions.csv', 'w', newline='') as f:
         senator_txs.to_csv(f, index=False)
 
     # LOGGER.info('Dumping to .pickle')

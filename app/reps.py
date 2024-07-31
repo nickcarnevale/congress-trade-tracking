@@ -4,7 +4,7 @@ import pandas as pd
 ROOT = 'https://disclosures-clerk.house.gov/public_disc/ptr-pdfs'
 
 # Parse the XML file
-tree = ET.parse('2024FD.xml')  # Replace 'your_file.xml' with the actual filename
+tree = ET.parse('data/2024FD.xml')  # Replace 'your_file.xml' with the actual filename
 root = tree.getroot()
 
 # Initialize a list to store members with FilingType 'P'
@@ -43,9 +43,9 @@ df = pd.DataFrame(filtered_members)
 print(filtered_members)
 
 # Save the DataFrame to a CSV file
-df.to_csv('filtered_members.csv', index=False)
+df.to_csv('output/filtered_members.csv', index=False)
 
-print("Filtered members saved to 'filtered_members.csv' s")
+print("Filtered members saved to 'output/filtered_members.csv'")
 
 
 
