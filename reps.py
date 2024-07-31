@@ -43,7 +43,8 @@ df = pd.DataFrame(filtered_members)
 # Save the DataFrame to a CSV file
 df.to_csv('filtered_members.csv', index=False)
 
-print("Filtered members saved to 'filtered_members.csv'")
+print("Filtered members saved to 'filtered_members.csv' s")
+
 
 
 
