@@ -1,5 +1,3 @@
-""" Scrape the stock transactions from Senator periodic filings. """
-
 from bs4 import BeautifulSoup
 import logging
 import pandas as pd
@@ -159,7 +157,7 @@ def main() -> pd.DataFrame:
     client = requests.Session()
     client.get = add_rate_limit(client.get)
     client.post = add_rate_limit(client.post)
-    reports = senator_reports(client, limit=5)  # Limit to one senator
+    reports = senator_reports(client, limit=10)  # Limit to one senator
     all_txs_list = []  # Use a list to collect all DataFrames
     for i, row in enumerate(reports):
         LOGGER.info('Fetching report #{}'.format(i+1))
@@ -170,7 +168,6 @@ def main() -> pd.DataFrame:
     # Concatenate all DataFrames into a single DataFrame
     all_txs = pd.concat(all_txs_list, ignore_index=True)
     return all_txs
-
 
 if __name__ == '__main__':
     log_format = '[%(asctime)s %(levelname)s] %(message)s'
