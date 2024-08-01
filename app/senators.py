@@ -5,7 +5,7 @@ import pickle
 import requests
 import time
 from typing import Any, List, Optional
-
+ 
 
 ROOT = 'https://efdsearch.senate.gov'
 LANDING_PAGE_URL = '{}/search/home/'.format(ROOT)
